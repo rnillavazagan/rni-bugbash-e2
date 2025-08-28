@@ -1,0 +1,37 @@
+name: Dummy Commit
+
+on:
+  repository_dispatch:
+    types: [trigger-dummy-commit]
+
+permissions:
+  contents: write
+
+jobs:
+  dummy-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Modify README
+        run: |
+          if grep -q "test" README.md; then
+            sed -i '/test/d' README.md
+          else
+            echo "test" >> README.md
+          fi
+
+      - name: Commit changes
+        run: |
+          git add README.md
+          git commit -m "Dummy commit" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
